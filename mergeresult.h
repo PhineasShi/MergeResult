@@ -4,6 +4,8 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_mergeresult.h"
 
+#include <QFileDialog>
+
 class MergeResult : public QMainWindow
 {
 	Q_OBJECT
@@ -11,11 +13,14 @@ class MergeResult : public QMainWindow
 public:
 	MergeResult(QWidget *parent = 0);
 	~MergeResult();
+public slots:
+	void on_pushButton_openDirs_clicked();
+	void on_pushButton_merge_clicked();
 
 private:
 	Ui::MergeResultClass ui;
-
-	void merge();
+	QDir mainDir;
+	QDir secDir;
 };
 
 #endif // MERGERESULT_H
