@@ -6,6 +6,7 @@
 
 #include <QFileDialog>
 #include <QDebug>
+#include <QMessageBox>
 
 class MergeResult : public QMainWindow
 {

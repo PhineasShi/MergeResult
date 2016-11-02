@@ -15,56 +15,59 @@ MergeResult::~MergeResult()
 
 void MergeResult::on_pushButton_merge_clicked()
 {
+	if (mainDir.isRelative()||secDir.isRelative())
+	{
+		QMessageBox::warning(this,"Incomplate Dirs","Please set all the dirs before merge operation!");
+		return;
+	}
+	qDebug() << mainDir.path() << endl << secDir.path();
 	mainDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	mainDir.setSorting(QDir::Name);
 	QFileInfoList mainDirList = mainDir.entryInfoList();
 	secDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	secDir.setSorting(QDir::Name);
-	QFileInfoList secSecDirList = secDir.entryInfoList();
-	for (int i = 0; i < secSecDirList.length(); i++)
+	QFileInfoList secSecLvDirList = secDir.entryInfoList();
+	for (int i = 0; i < secSecLvDirList.length(); i++)
 	{
-		QDir mainSecLvDir(mainDir.path()+"/"+ secSecDirList[i].fileName());
-		if (mainSecLvDir.exists()) 
+		QDir mainSecLvDir(mainDir.path()+"/"+ secSecLvDirList[i].fileName());
+		if (!mainSecLvDir.exists()) 
 		{
-			QDir secThirdLvDir(secSecDirList[i].filePath());
-			qDebug() << secSecDirList[i].filePath();
-			secThirdLvDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-			secThirdLvDir.setSorting(QDir::Name);
-			QFileInfoList secThirdLvDirList = secThirdLvDir.entryInfoList();
-			for (int j = 0; j < secThirdLvDirList.length(); j++)
-			{
-				QDir mainThirdLvDir(mainSecLvDir.path() + "/" + secThirdLvDirList[j].fileName());
-				if (true)
-				{
-
-				}
-			}
-		}
-		else
-		{
-			//将该文件夹下的文件夹及其文件夹下的文件拷贝过去
 			mainSecLvDir.mkdir(mainSecLvDir.path());
-			QDir secThirdLvDir(secSecDirList[i].filePath());
-			qDebug() << secSecDirList[i].filePath();
-			secThirdLvDir.setFilter(QDir::Dirs|QDir::NoDotAndDotDot);
-			secThirdLvDir.setSorting(QDir::Name);
-			QFileInfoList secThirdLvDirList = secThirdLvDir.entryInfoList();
-			for (int j = 0; j < secThirdLvDirList.length(); j++)
+		}
+		//将该文件夹下的文件夹及其文件夹下的文件拷贝过去	
+		QDir secSecLvDir(secSecLvDirList[i].filePath());			
+		qDebug() << secSecLvDirList[i].filePath();
+		secSecLvDir.setFilter(QDir::Dirs|QDir::NoDotAndDotDot);
+		secSecLvDir.setSorting(QDir::Name);
+		QFileInfoList secThirdLvDirList = secSecLvDir.entryInfoList();		//获得Sec的第三级文件夹结构
+		for (int j = 0; j < secThirdLvDirList.length(); j++)
+		{
+			QDir mainThirdLvDir(mainSecLvDir.path() + "/" + secThirdLvDirList[j].fileName());
+			if (!mainThirdLvDir.exists())
 			{
-				QDir mainThirdLvDir(mainSecLvDir.path() + "/" + secThirdLvDirList[j].fileName());
 				mainThirdLvDir.mkdir(mainThirdLvDir.path());
-				QDir secFourthLvDir(secThirdLvDirList[j].filePath());
-				qDebug() << secThirdLvDirList[j].filePath();
-				secFourthLvDir.setFilter(QDir::Files);
-				secFourthLvDir.setSorting(QDir::Name);
-				QFileInfoList secFourthLvDirList = secFourthLvDir.entryInfoList();
-				for (int k = 0; k < secFourthLvDirList.length(); k++)
-				{
-					QFile::copy(secFourthLvDirList[k].filePath(),mainThirdLvDir.filePath(secFourthLvDirList[k].fileName()));
-				}
+			}
+			mainThirdLvDir.setFilter(QDir::Files);
+			mainThirdLvDir.setSorting(QDir::Name);
+			QFileInfoList mainFourthLvDirList = mainThirdLvDir.entryInfoList();
+			int lastFileNum = 0;
+			for (int k = 0; k < mainFourthLvDirList.length(); k++)
+			{
+				lastFileNum = lastFileNum > mainFourthLvDirList[k].completeBaseName().toInt() ? lastFileNum : mainFourthLvDirList[k].completeBaseName().toInt();
+			}
+			QDir secThirdLvDir(secThirdLvDirList[j].filePath());
+			secThirdLvDir.setFilter(QDir::Files);
+			secThirdLvDir.setSorting(QDir::Name);
+			QFileInfoList secFourthLvDirList = secThirdLvDir.entryInfoList();
+			for (int k = 0; k < secFourthLvDirList.length(); k++)
+			{
+				int fileNum = secFourthLvDirList[k].completeBaseName().toInt() + lastFileNum;
+				QString fileName = QString::number(fileNum) +"." + secFourthLvDirList[k].suffix();
+				QFile::copy(secFourthLvDirList[k].filePath(), mainThirdLvDir.filePath(fileName));
 			}
 		}
 	}
+	QMessageBox::information(this,"Merge Succeed","Merge operation Succeed!");
 }
 
 void MergeResult::on_pushButton_openDirs_clicked()
