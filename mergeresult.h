@@ -5,6 +5,7 @@
 #include "ui_mergeresult.h"
 
 #include <QFileDialog>
+#include <QDebug>
 
 class MergeResult : public QMainWindow
 {
